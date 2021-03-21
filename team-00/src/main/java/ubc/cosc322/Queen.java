@@ -1,0 +1,61 @@
+package ubc.cosc322;
+
+import java.util.ArrayList;
+
+public class Queen extends Tile{
+	private int prevRow, prevCol;
+	private boolean opponent;
+	public Actions actions;
+	
+	public Queen(int row, int col, boolean opponent) {
+		super(row,col);
+		this.opponent = opponent;
+		this.actions = new Actions();
+	}
+	public int getPrevRow() {return prevRow;}
+	public void setPrevRow() {this.prevRow = this.getRow();}
+	public int getPrevCol() {return prevCol;}
+	public void setPrevCol() {this.prevCol = this.getCol();}
+	public boolean getOpponent() {return opponent;}
+	public ArrayList<Integer> bestArrowThrow(Board board) {
+        int[][] scoredBoard = new int[10][10];
+        for(int i = 0; i < board.allies.length; i++) {
+            int row = board.allies[i].getRow();
+            int col = board.allies[i].getCol();
+            scoredBoard[row][col] = -3;
+        }
+        for(int i = 0; i < board.enemies.length; i++) {
+            int row = board.enemies[i].getRow();
+            int col = board.enemies[i].getCol();
+            scoredBoard[row][col] = 3;
+        }
+        for(int i = 0; i < 3; i++) {
+            int score;
+            for(int row = 0; row < 10; row++) {
+                for(int col = 0; col < 10; col++) {
+                    if(scoredBoard[row][col] != 0) {
+                        score = 0;
+                        score += scoredBoard[row+1][col];
+                        score += scoredBoard[row-1][col];
+                        score += scoredBoard[row][col+1];
+                        score += scoredBoard[row][col-1];
+                        score -= score / Math.abs(score);
+                        scoredBoard[row][col] = score;
+                    }
+                }
+            }
+        }
+
+        this.actions.getArrowThrows(board, this);
+        ArrayList<Integer> bestMove = new ArrayList<Integer>();
+        int bestScore = -99;
+        for(int i = 0; i < this.actions.arrowThrows.size(); i++) {
+            int moveScore = scoredBoard[this.actions.arrowThrows.get(i).get(0)][this.actions.arrowThrows.get(i).get(1)];
+            if(moveScore > bestScore) {
+                bestMove = this.actions.arrowThrows.get(i);
+                bestScore = moveScore;
+            }
+        }
+        return bestMove;
+    }
+}
